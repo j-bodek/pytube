@@ -160,6 +160,7 @@ def channel_name(url: str) -> str:
     - :samp:`https://youtube.com/channel/{channel_id}/*
     - :samp:`https://youtube.com/u/{channel_name}/*`
     - :samp:`https://youtube.com/user/{channel_id}/*
+    - :samp:`https://youtube.com/@{channel_name}/*`
 
     :param str url:
         A YouTube url containing a channel name.
@@ -169,9 +170,11 @@ def channel_name(url: str) -> str:
     """
     patterns = [
         r"(?:\/(c)\/([%\d\w_\-]+)(\/.*)?)",
+        r"(?:\/(c)\/([%\d\w_\-]+)(\/.*)?)",
         r"(?:\/(channel)\/([%\w\d_\-]+)(\/.*)?)",
         r"(?:\/(u)\/([%\d\w_\-]+)(\/.*)?)",
-        r"(?:\/(user)\/([%\w\d_\-]+)(\/.*)?)"
+        r"(?:\/(user)\/([%\w\d_\-]+)(\/.*)?)",
+        r"(@(?<=@)[^\/]+)"
     ]
     for pattern in patterns:
         regex = re.compile(pattern)
@@ -179,6 +182,9 @@ def channel_name(url: str) -> str:
         if function_match:
             logger.debug("finished regex search, matched: %s", pattern)
             uri_style = function_match.group(1)
+            if '@' in uri_style:
+                return f'/{uri_style}'
+            
             uri_identifier = function_match.group(2)
             return f'/{uri_style}/{uri_identifier}'
 
